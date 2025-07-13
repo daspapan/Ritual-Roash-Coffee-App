@@ -1,20 +1,33 @@
 #!/usr/bin/env node
+import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
+import * as gitBranch from 'git-branch';
+import { CDKContext } from '../types';
 import { InfraStack } from '../lib/infra-stack';
 
 const app = new cdk.App();
-new InfraStack(app, 'InfraStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const currentBranch = process.env.AWS_BRANCH || gitBranch.sync();
+console.log(`Deploying on branch -> ${currentBranch}`);
+const globals = app.node.tryGetContext('globals') || {}
+console.log(`Globals -> ${JSON.stringify(globals)}`);
+const branchConfig = app.node.tryGetContext(currentBranch);
+console.log(`Branch config -> ${JSON.stringify(branchConfig)}`);
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-});
+if(!branchConfig){
+    throw new Error(`No configuration found for branch: ${currentBranch}`)
+}
+
+const context: CDKContext & cdk.StackProps = {
+    branch: currentBranch,
+    ...globals,
+    ...branchConfig
+}
+
+console.log(`Context -> ${JSON.stringify(context)}`);
+
+const appName = `${context.appName}-${context.stage}`
+const stackName = `${appName}-Stack`
+
+new InfraStack(app, stackName, { stackName, env: context.env }, context)

@@ -1,0 +1,33 @@
+{
+    "globals": {
+        "appName": "RRC",
+        "hosting": {
+            "domainName": "ritualroashcoffee.com",
+            "certificateArn": "ab52a4a1-7f88-4b63-94f5-dba136ecd2b9",
+            "ghTokenName": "github-token-4",
+            "ghOwner": "daspapan",
+            "repo": "Ritual-Roash-Coffee-App"
+        }
+    },
+    "main": {
+        "stage": "Prod",
+        "env": {
+            "account": "919620897356",
+            "region": "ap-south-1"
+        }
+    },
+    "staging": {
+        "stage": "Stag",
+        "env": {
+            "account": "919620897356",
+            "region": "ap-south-1"
+        }
+    },
+    "develop": {
+        "stage": "Dev",
+        "env": {
+            "account": "919620897356",
+            "region": "ap-south-1"
+        }
+    }
+}
