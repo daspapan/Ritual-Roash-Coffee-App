@@ -1,5 +1,16 @@
 {
-  "RRC-Prod-Stack": {
-    "Region": "ap-south-1"
+  "RRC-Dev-Stack": {
+    "Subnet2IdData": "subnet-099293f8a529cc376",
+    "VpcId": "vpc-03f02af35d0cc5d8c",
+    "Subnet2IdApplication": "subnet-0ad814c17bb17bd65",
+    "Subnet1IdPublic": "subnet-0dbf3962eb5da3fab",
+    "Subnet1IdApplication": "subnet-011f010b336b1e060",
+    "Region": "ap-south-1",
+    "Subnet1IdData": "subnet-09228529aa692ce91",
+    "SecurityGroupIdData": "sg-04925468a5b8be94c",
+    "RepositoryEcrUri": "919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-fargate-app-images",
+    "Subnet2IdPublic": "subnet-0ad6442934cdc4fb6",
+    "SecurityGroupIdPublic": "sg-076b178523dd087ea",
+    "SecurityGroupIdApplication": "sg-0725937728aad3c60"
   }
 }
