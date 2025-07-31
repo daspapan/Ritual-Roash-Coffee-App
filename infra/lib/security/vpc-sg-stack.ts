@@ -57,6 +57,13 @@ export function createSecurityGroup(scope: Construct, props: APIGatewayProps) {
         'Allow inbound from Application SG to MySQL'
     );
 
+    // Allow inbound from the Application SG (Fargate tasks to PostgreSQL)
+    dataSecurityGroup.addIngressRule(
+        applicationSecurityGroup,
+        Port.tcp(5432), // Default PostgreSQL port
+        'Allow inbound from Application SG to PostgreSQL'
+    );
+
     return {publicSecurityGroup, applicationSecurityGroup, dataSecurityGroup}
 
 }

@@ -2,7 +2,7 @@ import React from 'react'
 import Form from '../form/Form'
 import Input from '../input/Input'
 import DefaultButton from '../button/DefaultButton'
-import { createTodo } from '@/actions/actions'
+import { createTodo } from '@/actions'
 
 interface AddTodoProps {
     name?:string

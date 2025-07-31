@@ -6,19 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "db:migrate": "npx prisma migrate deploy",
-    "db:push": "npx prisma db push",
-    "db:seed": "npx prisma db seed",
-    "db:reset": "npx prisma migrate reset",
-    "postinstall": "npx prisma generate",
-    "db:setup": "npm run db:push && npm run postinstall"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^6.12.0",
     "clsx": "^2.1.1",
     "next": "15.3.5",
     "pg": "^8.16.3",
@@ -35,7 +25,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
-    "prisma": "^6.12.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",

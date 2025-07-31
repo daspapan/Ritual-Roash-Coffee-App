@@ -8,6 +8,7 @@ interface DefaultButtonProps {
     onClick?: () => void;
     actionButton?:boolean;
     bgColor?:string;
+    textColor?:string;
 }
 
 const DefaultButton = ({type, text, onClick, actionButton, bgColor, ...props}: DefaultButtonProps) => {

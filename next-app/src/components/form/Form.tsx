@@ -10,7 +10,7 @@ interface FormProps {
     onSubmit?: () => void;
 }
 
-const Form = ({children, action, className, onSubmit}:FormProps) => {
+const Form = ({children, action, onSubmit}:FormProps) => {
     const ref = useRef<HTMLFormElement>(null);
     return (
         <form action={

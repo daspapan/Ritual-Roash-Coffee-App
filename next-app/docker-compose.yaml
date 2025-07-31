@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: nextjs-dev
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=development
       - DATABASE_URL=${DATABASE_URL}
@@ -21,6 +21,24 @@ services:
             - node_modules/
         - action: rebuild
           path: package.json
+
+
+  todoapp:
+    container_name: ${DOCKER_IMG_APP_NAME}
+    hostname: ${DOCKER_IMG_APP_NAME}
+    image: ${DOCKER_IMG_APP_NAME}:${DOCKER_IMG_APP_VER}
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DEBUG=${DEBUG}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASS}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASS=${POSTGRES_PASS}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - 3001:3001
+    depends_on:
+      - postgres
 
   mysql:
     image: mysql:8
@@ -45,6 +63,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d # For initial schema
     
 
   pgadmin4: # http://localhost:5050/login?next=/browser/

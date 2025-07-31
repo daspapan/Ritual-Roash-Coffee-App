@@ -5,6 +5,8 @@ import { LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
 import { createVPC } from './networking/vpc-stack';
 import { createSecurityGroup } from './security/vpc-sg-stack';
 import { createECRRepository } from './repository/ecr-repo';
+import { createRDS } from './database/rds-stack';
+import { createFargate } from './Fargate/fargate-stack';
 
 
 export class InfraStack extends cdk.Stack {
@@ -13,11 +15,13 @@ export class InfraStack extends cdk.Stack {
         super(scope, id, props);
 
         const appName = `${context.appName}-${context.stage}`;
-        console.log(`AppName -> ${appName}`)
+        const appStage = `${context.stage}`
+        const dbName = `${context.hosting.dbName}`
 
-
+        console.log(`========================================================`)
+        console.log(`App-Name -> ${appName}`, `App-Stage => ${appStage}`)
         console.log(JSON.stringify(context, null, 2))
-
+        console.log(`========================================================`)
 
         // Networking
         const vpc = createVPC(this, {appName: appName, })
@@ -26,7 +30,21 @@ export class InfraStack extends cdk.Stack {
         const securityGroup = createSecurityGroup(this, {appName: appName, vpc: vpc})
 
         // Repository
-        const ecrRepository = createECRRepository(this, {appName: appName, })
+        const ecrRepository = createECRRepository(this, {appName, appStage})
+
+        // RDS - Database
+        const rds = createRDS(this, {appName, vpc})
+
+        // ECS - Fargate
+        const fargate = createFargate(this, {
+            appName,
+            appStage,
+            dbName,
+            vpc,
+            appRepository: ecrRepository,
+            dbSecret: rds.dbSecret,
+            database: rds.database,
+        })
 
 
 
@@ -79,6 +97,13 @@ export class InfraStack extends cdk.Stack {
         new cdk.CfnOutput(this, 'RepositoryEcrUri', {
             value: ecrRepository.repositoryUri,
             description: 'The URI of the Amazon ECR private repository',
+        });
+
+
+        // Output the Load Balancer URL
+        new cdk.CfnOutput(this, 'LoadBalancerDNS', {
+            value: fargate.fargateService.loadBalancer.loadBalancerDnsName,
+            description: 'The URL of the application load balancer',
         });
 
     }

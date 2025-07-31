@@ -3,10 +3,6 @@ set -x
 
 source ${PWD}/next-app/.env
 
-echo $DATABASE_URL
-
-sleep 5
-
-docker-compose -f next-app/docker-compose.yaml up -d postgres pgadmin4 app
+docker-compose -f next-app/docker-compose.yaml up -d postgres pgadmin4 
 
 ./monit.sh

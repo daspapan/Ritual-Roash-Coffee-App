@@ -1,16 +1,19 @@
 {
   "RRC-Dev-Stack": {
-    "Subnet2IdData": "subnet-0ef0732b0b9b35085",
-    "VpcId": "vpc-069ec68ca36691dc9",
-    "Subnet2IdApplication": "subnet-06017031034f4afeb",
-    "Subnet1IdPublic": "subnet-0954e6e00b8966029",
-    "Subnet1IdApplication": "subnet-0150af7023ae77f6c",
-    "Region": "ap-south-1",
-    "Subnet1IdData": "subnet-04dd71960b901a138",
-    "SecurityGroupIdData": "sg-03804ee87a8d6c610",
+    "Subnet2IdData": "subnet-01ce133bf1ae7213d",
+    "Subnet2IdApplication": "subnet-0a96e69ea62f6ba0a",
+    "Subnet1IdApplication": "subnet-0fdbacef88d3db5a0",
+    "Subnet1IdData": "subnet-06ab677390513b01f",
+    "SecurityGroupIdData": "sg-04c1eda2145501e3f",
     "RepositoryEcrUri": "919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-fargate-app-images",
-    "Subnet2IdPublic": "subnet-0f018bd5d601e6990",
-    "SecurityGroupIdPublic": "sg-0c82105abc40a1dc9",
-    "SecurityGroupIdApplication": "sg-09ce3802b6ddb75a6"
+    "RRCDevFargateServiceLoadBalancerDNSB497548C": "RRC-De-RRCDe-EiRH1a6fTBpE-631522709.ap-south-1.elb.amazonaws.com",
+    "RRCDevFargateServiceServiceURL313F97F3": "http://RRC-De-RRCDe-EiRH1a6fTBpE-631522709.ap-south-1.elb.amazonaws.com",
+    "VpcId": "vpc-0800d860ebad593c9",
+    "Subnet1IdPublic": "subnet-0144dc04816c5b07c",
+    "Region": "ap-south-1",
+    "LoadBalancerDNS": "RRC-De-RRCDe-EiRH1a6fTBpE-631522709.ap-south-1.elb.amazonaws.com",
+    "Subnet2IdPublic": "subnet-00ec2504a678c92cf",
+    "SecurityGroupIdPublic": "sg-0b767623df959ac93",
+    "SecurityGroupIdApplication": "sg-07ac6fe1985d3f36a"
   }
 }

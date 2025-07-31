@@ -5,10 +5,9 @@ import DefaultButton from '../button/DefaultButton';
 import { MdEdit } from 'react-icons/md';
 import Input from '../input/Input';
 import Form from '../form/Form';
-import { updateTodo } from '@/actions/actions';
-import { todo } from '@/generated/prisma';
+import * as actions from '@/actions'
 
-const EditTodo = ({todo}:{todo:todo}) => {
+const EditTodo = ({todo}:{todo:actions.TodoInput}) => {
 
     const [editTodo, setEditTodo] = useState(false);
 
@@ -25,10 +24,10 @@ const EditTodo = ({todo}:{todo:todo}) => {
             <DefaultButton onClick={handleEdit} text={<MdEdit/>} actionButton/>
 
             {editTodo ? (
-                <Form action={updateTodo} onSubmit={handleSubmit}>
+                <Form action={actions.updateTodo} onSubmit={handleSubmit}>
                     <div className="flex justify-center">
                         <Input name='id' type='hidden' value={String(todo.id)}></Input>
-                        <Input name='newTitle' type='text' placeholder='New Title ...'/>
+                        <Input name='title' type='text' placeholder='New Title ...'/>
                         <DefaultButton type='submit' text="Save"></DefaultButton>
                     </div>
                 </Form>

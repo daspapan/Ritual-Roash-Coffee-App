@@ -12,5 +12,6 @@ export type CDKContext = {
         ghTokenName: string
         ghOwner: string
         repo: string
+        dbName: string
     }
 }

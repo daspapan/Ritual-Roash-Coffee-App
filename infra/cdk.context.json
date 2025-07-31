@@ -6,7 +6,8 @@
       "certificateArn": "ab52a4a1-7f88-4b63-94f5-dba136ecd2b9",
       "ghTokenName": "github-token-4",
       "ghOwner": "daspapan",
-      "repo": "Ritual-Roash-Coffee-App"
+      "repo": "Ritual-Roash-Coffee-App",
+      "dbName":"todoslist"
     }
   },
   "main": {
