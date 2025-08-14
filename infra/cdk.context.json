@@ -7,6 +7,9 @@
       "ghTokenName": "github-token-4",
       "ghOwner": "daspapan",
       "repo": "Ritual-Roash-Coffee-App",
+      "dbHost": "",
+      "dbUser": "dbuser",
+      "dbPass": "dbpass",
       "dbName":"todoslist"
     }
   },

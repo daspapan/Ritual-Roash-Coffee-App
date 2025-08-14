@@ -1,0 +1,20 @@
+{
+  "name": "lambda-image-handler",
+  "version": "1.0.0",
+  "description": "Lambda for S3 image upload/download presigned URLs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.x.x",
+    "@aws-sdk/s3-request-presigner": "^3.x.x",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.138",
+    "@types/node": "^20.14.9",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.5.3"
+  }
+}

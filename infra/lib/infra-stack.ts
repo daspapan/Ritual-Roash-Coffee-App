@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { CDKContext } from '../types';
 import { LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
@@ -7,7 +8,13 @@ import { createSecurityGroup } from './security/vpc-sg-stack';
 import { createECRRepository } from './repository/ecr-repo';
 import { createRDS } from './database/rds-stack';
 import { createFargate } from './Fargate/fargate-stack';
+import { createFunctions } from './compute/functions';
 
+
+export interface ImageStackProps extends cdk.StackProps {
+    vpc?: ec2.Vpc;
+    privateSecurityGroup?: ec2.SecurityGroup; // For Lambda
+}
 
 export class InfraStack extends cdk.Stack {
 
@@ -24,7 +31,7 @@ export class InfraStack extends cdk.Stack {
         console.log(`========================================================`)
 
         // Networking
-        const vpc = createVPC(this, {appName: appName, })
+        const {vpc, vpcRole} = createVPC(this, {appName: appName, })
 
         // Security Group
         const securityGroup = createSecurityGroup(this, {appName: appName, vpc: vpc})
@@ -33,7 +40,14 @@ export class InfraStack extends cdk.Stack {
         const ecrRepository = createECRRepository(this, {appName, appStage})
 
         // RDS - Database
-        const rds = createRDS(this, {appName, vpc})
+        const rds = createRDS(this, {
+            appName, 
+            vpc, 
+            vpcRole,
+            dbUser: context.hosting.dbUser, 
+            dbName: context.hosting.dbName,
+            dataSecurityGroup: securityGroup.dataSecurityGroup,
+        })
 
         // ECS - Fargate
         const fargate = createFargate(this, {
@@ -47,6 +61,19 @@ export class InfraStack extends cdk.Stack {
         })
 
 
+        // NodejsFunction & LambdaFunction
+        const computeStack = createFunctions(this, {
+            appName: appName,
+            stageName: context.stage,
+            awsRegion: context.env.region,
+            vpc,
+            vpcRole,
+            dbName,
+            dbSecret: rds.dbSecret,
+            database: rds.database,
+            lambdaRole: vpcRole,
+            applicationSG: securityGroup.applicationSecurityGroup,
+        }); 
 
 
         // AWS Settings
@@ -106,6 +133,18 @@ export class InfraStack extends cdk.Stack {
             description: 'The URL of the application load balancer',
         });
 
+        // Database
+        new cdk.CfnOutput(this, "DatabaseHostname", {
+            value: rds.database.instanceEndpoint.hostname,
+            description: 'The Database Hostname',
+        })
+        new cdk.CfnOutput(this, "DatabasePort", {
+            value: rds.database.instanceEndpoint.port.toString(),
+            description: 'The Database Port',
+        })
+
     }
 
 }
+
+// / AWS CDK using TypeScript postgress RDS  programmatically adding database, user and table

@@ -1,4 +1,4 @@
-import { Peer, Port, SecurityGroup, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { InterfaceVpcEndpointAwsService, Peer, Port, SecurityGroup, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 type APIGatewayProps = {
@@ -50,12 +50,6 @@ export function createSecurityGroup(scope: Construct, props: APIGatewayProps) {
         description: 'Security group for MySQL database in data subnets',
         allowAllOutbound: false, // Database typically has restricted outbound
     });
-    // Allow inbound from the Application SG (Fargate tasks to MySQL)
-    dataSecurityGroup.addIngressRule(
-        applicationSecurityGroup,
-        Port.tcp(3306), // Default MySQL port
-        'Allow inbound from Application SG to MySQL'
-    );
 
     // Allow inbound from the Application SG (Fargate tasks to PostgreSQL)
     dataSecurityGroup.addIngressRule(
@@ -63,6 +57,39 @@ export function createSecurityGroup(scope: Construct, props: APIGatewayProps) {
         Port.tcp(5432), // Default PostgreSQL port
         'Allow inbound from Application SG to PostgreSQL'
     );
+
+
+    props.vpc.addInterfaceEndpoint(`${props.appName}-InterfaceEndpoints-Lambda`, {
+        service: InterfaceVpcEndpointAwsService.LAMBDA,
+        subnets: {
+            subnets: props.vpc.privateSubnets
+        },
+        securityGroups: [applicationSecurityGroup]
+    })
+
+    props.vpc.addInterfaceEndpoint(`${props.appName}-InterfaceEndpoints-SecretManager`, {
+        service: InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+        subnets: {
+            subnets: props.vpc.privateSubnets
+        },
+        securityGroups: [applicationSecurityGroup]
+    })
+
+    /* props.vpc.addInterfaceEndpoint(`${props.appName}-InterfaceEndpoints-EcrDockerEndpoint`, {
+        service: InterfaceVpcEndpointAwsService.ECR_DOCKER,
+    });
+
+    props.vpc.addInterfaceEndpoint(`${props.appName}-InterfaceEndpoints-EcrApiEndpoint`, {
+        service: InterfaceVpcEndpointAwsService.ECR,
+    });
+
+    props.vpc.addInterfaceEndpoint(`${props.appName}-InterfaceEndpoints-S3Endpoint`, {
+        service: InterfaceVpcEndpointAwsService.S3,
+    });
+
+    props.vpc.addInterfaceEndpoint(`${props.appName}-InterfaceEndpoints-LogsEndpoint`, {
+        service: InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
+    }); */
 
     return {publicSecurityGroup, applicationSecurityGroup, dataSecurityGroup}
 
