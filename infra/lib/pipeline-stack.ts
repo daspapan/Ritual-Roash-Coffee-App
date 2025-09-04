@@ -5,9 +5,11 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { CDKContext } from '../types';
+import * as pipeline from 'aws-cdk-lib/pipelines';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
+import { FargateStack } from './fargate-v2-stack';
 
 export interface PipelineStackProps extends cdk.StackProps {
     fargateService: ecs.FargateService;
@@ -38,19 +40,92 @@ export class PipelineStack extends cdk.Stack {
         const { fargateService, ecrRepository } = props;
 
 
+        // Retrieve GitHub token from AWS Secrets Manager
+        const githubToken = secretsmanager.Secret.fromSecretNameV2(this, 'GitHubTokenSecret', 'github-token-1');
+
+
+        /* const fargatePipeline = new pipeline.CodePipeline(this, `${appName}-Pipeline`, {
+            pipelineName: `${appName}-Fargate-Pipeline`,
+            synth: new pipeline.ShellStep(`${appName}-Synth`, {
+                input: pipeline.CodePipelineSource.gitHub(`${owner}/${repo}`, `${branch}`, {
+                    authentication: cdk.SecretValue.secretsManager(githubToken.secretName)
+                }),
+                commands: [
+                    'cd next-app',
+                    'npm ci',
+                    'npm run build'
+                ],
+                primaryOutputDirectory: 'next-app/.next',
+            }),
+            selfMutation: true,
+        })
+
+        
+        const deployStage = new cdk.Stage(this, `${appName}-Deploy`, {
+            env: context.env,
+        });
+
+
+        const nextjsFargateApp = new FargateStack(deployStage, 'NextjsFargateApp', {...props}, {...context});
+
+
+        // Add a Docker build and push step
+        // 919620897356.dkr.ecr.ap-south-1.amazonaws.com/
+        const dockerBuildStep = new pipeline.ShellStep(`${appName}-DockerBuildAndPush`, {
+            commands: [
+                'cd next-app', // Change to your frontend directory
+                'npm ci',
+                'npm run build',
+                'echo "Login in to Amazon ECR..."',
+                'aws --version',
+                'echo "ACCOUNT_ID:`$ACCOUNT_ID` - REGION: `$REGION`"',
+                'aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com',
+                'docker build -t $ECR_REPO_URI:latest .',
+                'docker tag $ECR_REPO_URI:latest $ECR_REPO_URI:latest',
+                'docker push $ECR_REPO_URI:latest',
+            ],
+            env: {
+                ACCOUNT_ID: `${context.env.account}`,
+                REGION: `${context.env.region}`,
+                CONTAINER_NAME: "my-todo-nextjs-app",
+                ECR_REPO_URI: ecrRepository.repositoryUri,
+            }
+
+        });
+
+
+        // Add a deployment step
+        const fargateDeployStep = new pipeline.ShellStep('FargateDeploy', {
+            commands: [
+                'echo "Updating fargate service on `date`',
+                'echo "Updating fargate service..."',
+                `aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment`,
+            ],
+            env: {
+                CLUSTER_NAME: fargateService.cluster.clusterName,
+                SERVICE_NAME: fargateService.serviceName,
+            }
+        });
+            
+        fargatePipeline.addStage(deployStage, {
+            post: [new pipeline.ManualApprovalStep('Approval'), dockerBuildStep, fargateDeployStep],
+        }); */
+    
+
+
+        /* 
+
+        GitHub Token : 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
+        Source Youtube Video : https://www.youtube.com/watch?v=Z3YNjMxuN9U&t=683s
+
         this.githubSecret = new secretsmanager.Secret(this, `${appName}-GitHubSecret`, {
             secretName: `${tokenName}`,
             description: 'GitHub Personal Access Token for CI/CD',
             secretStringValue: cdk.SecretValue.unsafePlainText(`${token}`), // The actual token value
             removalPolicy: cdk.RemovalPolicy.DESTROY
-        })
+        }) */
 
-        const githubToken = cdk.SecretValue.secretsManager(`${tokenName}`)
-        console.log("[GITHUB-SECRET]", githubToken)
-        console.log("[GITHUB-SECRET]", githubToken)
-        console.log("[GITHUB-SECRET]", githubToken)
-        console.log("[GITHUB-SECRET]", githubToken)
-        console.log("[GITHUB-SECRET]", githubToken)
+        // const githubToken = cdk.SecretValue.secretsManager(githubToken.secretName)
 
 
         // 1. Source Stage: Fetch code from a repository
@@ -58,7 +133,7 @@ export class PipelineStack extends cdk.Stack {
             actionName: `${appName}-GithubSource`,
             owner,
             repo,
-            oauthToken: githubToken,
+            oauthToken: cdk.SecretValue.secretsManager(githubToken.secretName),
             output: sourceOutput,
             branch,
         });
@@ -82,7 +157,7 @@ export class PipelineStack extends cdk.Stack {
                         commands: [
                             'echo "Change directory to next-app"',
                             'cd next-app'
-                        ]
+                        ], 
                     },
                     pre_build: {
                         commands: [
@@ -105,6 +180,9 @@ export class PipelineStack extends cdk.Stack {
                             'echo "Build complete on `date`',
                             'echo "Pushing Docker image to ECR..."',
                             'docker push $ECR_REPO_URI:latest',
+                            'echo "Updating fargate service on `date`',
+                            'echo "Updating fargate service... $CLUSTER_NAME - $SERVICE_NAME"',
+                            `aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --force-new-deployment`,
                             'echo "Writing image definitions file..."',
                             'printf \'[{"name","%s","imageUri":"%s"}]\' "$CONTAINER_NAME $ECR_REPO_URI:latest" > image.json',
                         ],
@@ -130,10 +208,12 @@ export class PipelineStack extends cdk.Stack {
                     input: sourceOutput,
                     outputs: [buildOutput],
                     environmentVariables: {
-                        'AWS_ACCOUNT_ID': {value: "919620897356"},
-                        'AWS_REGION': {value: "ap-south-1"},
-                        'CONTAINER_NAME': {value: "helloworld"},
+                        'AWS_ACCOUNT_ID': {value: context.env.account},
+                        'AWS_REGION': {value: context.env.region},
+                        'CONTAINER_NAME': {value: "my-todo-nextjs-app"},
                         'ECR_REPO_URI': { value: ecrRepository.repositoryUri },
+                        'CLUSTER_NAME': {value: fargateService.cluster.clusterName},
+                        'SERVICE_NAME': {value: fargateService.serviceName},
                     },
                 }),
             ],
