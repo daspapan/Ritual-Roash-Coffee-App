@@ -14,7 +14,7 @@ const NavBar = async () => {
                 <a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
                     <img src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Flowbite Logo" />
                     <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">ToDo's App</span>
-                    <span className='pt-2 text-sm font-extrabold italic text-gray-300 dark:text-white'>{platform}</span>
+                    <span className='pt-2 text-sm font-extrabold italic text-gray-300 dark:text-white'>{platform}-v1</span>
                 </a>
                 
                 <div className="hidden w-full md:block md:w-auto" id="navbar-default">

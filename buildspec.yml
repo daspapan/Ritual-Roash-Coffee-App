@@ -6,21 +6,21 @@ phases:
       - cd next-app
       - echo Logging in to Amazon ECR...
       - aws --version
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 919620897356.dkr.ecr.ap-south-1.amazonaws.com
+      - REPOSITORY_URI=919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
-      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+      - docker build -t my-todo-nextjs-app:latest .
+      - docker tag my-todo-nextjs-app:latest 919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push 919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest
       - echo Writing image definitions file...
-      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "yt-video-cluster" "919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest" > imagedefinitions.json
 
 artifacts:
     files: imagedefinitions.json

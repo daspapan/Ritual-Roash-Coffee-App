@@ -17,7 +17,7 @@ docker rmi -f $(docker images ${DOCKER_IMG_APP_NAME} -q)
 docker build --platform=linux/amd64 -t ${DOCKER_IMG_APP_NAME}:${DOCKER_IMG_APP_VER} . 
 
 
-aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 919620897356.dkr.ecr.ap-south-1.amazonaws.com
+# aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 919620897356.dkr.ecr.ap-south-1.amazonaws.com
 
 
 # Bring up docker containers
