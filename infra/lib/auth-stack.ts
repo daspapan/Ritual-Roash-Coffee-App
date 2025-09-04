@@ -4,7 +4,7 @@ import { Construct } from 'constructs';
 import { CDKContext } from '../types';
 
 export interface AuthStackProps extends cdk.StackProps {
-    vpc: ec2.Vpc;
+    vpc?: ec2.Vpc;
 }
 
 export class AuthStack extends cdk.Stack {

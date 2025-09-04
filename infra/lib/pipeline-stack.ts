@@ -10,6 +10,37 @@ import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { FargateStack } from './fargate-v2-stack';
+import { AuthStack } from './auth-stack';
+
+
+/* 
+GitHub Token : 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
+Source Youtube Video : https://www.youtube.com/watch?v=Z3YNjMxuN9U&t=683s
+*/
+
+
+export interface PipelineStageProps extends cdk.StageProps {
+    stageName: string
+}
+
+export class PipelineStage extends cdk.Stage {
+    constructor(scope: Construct, id: string, props: PipelineStageProps, context: CDKContext){
+        super(scope, id, props)
+
+        const appName = `${context.appName}-${context.stage}`;
+
+        new AuthStack(
+            this, 
+            `${appName}-AuthStack`, 
+            {
+                stackName: `${appName}-AuthStack`, 
+                env: context.env
+            }, 
+            context
+        )
+    }
+}
+
 
 export interface PipelineStackProps extends cdk.StackProps {
     fargateService: ecs.FargateService;
@@ -32,9 +63,9 @@ export class PipelineStack extends cdk.Stack {
         const repo = `${context.hosting.ghRepo}`
         const branch = `${context.hosting.ghBranch}` || 'main'
 
-        const pipeline = new codepipeline.Pipeline(this, `${appName}-Pipeline`);
-        const sourceOutput = new codepipeline.Artifact();
-        const buildOutput = new codepipeline.Artifact();
+        // const pipeline = new codepipeline.Pipeline(this, `${appName}-Pipeline`);
+        // const sourceOutput = new codepipeline.Artifact();
+        // const buildOutput = new codepipeline.Artifact();
 
 
         const { fargateService, ecrRepository } = props;
@@ -44,12 +75,10 @@ export class PipelineStack extends cdk.Stack {
         const githubToken = secretsmanager.Secret.fromSecretNameV2(this, 'GitHubTokenSecret', 'github-token-1');
 
 
-        /* const fargatePipeline = new pipeline.CodePipeline(this, `${appName}-Pipeline`, {
+        const fargatePipeline = new pipeline.CodePipeline(this, `${appName}-Pipeline`, {
             pipelineName: `${appName}-Fargate-Pipeline`,
             synth: new pipeline.ShellStep(`${appName}-Synth`, {
-                input: pipeline.CodePipelineSource.gitHub(`${owner}/${repo}`, `${branch}`, {
-                    authentication: cdk.SecretValue.secretsManager(githubToken.secretName)
-                }),
+                input: pipeline.CodePipelineSource.gitHub(`${owner}/${repo}`, `${branch}`),
                 commands: [
                     'cd next-app',
                     'npm ci',
@@ -61,12 +90,12 @@ export class PipelineStack extends cdk.Stack {
         })
 
         
-        const deployStage = new cdk.Stage(this, `${appName}-Deploy`, {
+        /* const deployStage = new cdk.Stage(this, `${appName}-Deploy`, {
             env: context.env,
-        });
+        });*/
 
 
-        const nextjsFargateApp = new FargateStack(deployStage, 'NextjsFargateApp', {...props}, {...context});
+        // const nextjsFargateApp = new FargateStack(deployStage, 'NextjsFargateApp', {...props}, {...context});
 
 
         // Add a Docker build and push step
@@ -107,16 +136,15 @@ export class PipelineStack extends cdk.Stack {
             }
         });
             
-        fargatePipeline.addStage(deployStage, {
+        fargatePipeline.addStage(new PipelineStage(this, `${appName}-${appStage}`, {stageName: appStage,}, {...context}), {
             post: [new pipeline.ManualApprovalStep('Approval'), dockerBuildStep, fargateDeployStep],
-        }); */
+        }); 
     
 
 
-        /* 
+        
 
-        GitHub Token : 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
-        Source Youtube Video : https://www.youtube.com/watch?v=Z3YNjMxuN9U&t=683s
+        /*
 
         this.githubSecret = new secretsmanager.Secret(this, `${appName}-GitHubSecret`, {
             secretName: `${tokenName}`,
@@ -129,7 +157,7 @@ export class PipelineStack extends cdk.Stack {
 
 
         // 1. Source Stage: Fetch code from a repository
-        const sourceAction = new codepipeline_actions.GitHubSourceAction({
+        /* const sourceAction = new codepipeline_actions.GitHubSourceAction({
             actionName: `${appName}-GithubSource`,
             owner,
             repo,
@@ -231,7 +259,7 @@ export class PipelineStack extends cdk.Stack {
                     input: buildOutput,
                 }),
             ],
-        });
+        }); */
 
 
 
