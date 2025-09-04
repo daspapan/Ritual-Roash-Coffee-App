@@ -23,8 +23,9 @@ INSERT INTO tests (title, completed) VALUES
 
 CREATE TYPE "TodoStatus" AS ENUM ('TODO', 'IN_PROGRESS', 'DONE');
 CREATE TYPE "TodoPriority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');
+CREATE TYPE "TodoAttachFileType" AS ENUM ('LOCAL', 'S3');
 
-CREATE TABLE IF NOT EXISTS todos (
+CREATE TABLE IF NOT EXISTS public.todos (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
@@ -34,6 +35,9 @@ CREATE TABLE IF NOT EXISTS todos (
     priority "TodoPriority" NOT NULL DEFAULT 'LOW',
     assignee TEXT NOT NULL DEFAULT 'self',
     remark TEXT,
+    content_type TEXT,
+    storage "TodoAttachFileType" NOT NULL DEFAULT 'LOCAL',
+    attachment TEXT DEFAULT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

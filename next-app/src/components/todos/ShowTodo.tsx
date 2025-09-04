@@ -6,24 +6,26 @@ import DefaultButton from '../button/DefaultButton'
 import Todo from './Todo'
 import { FaCheck } from 'react-icons/fa'
 
-const ShowTodo = () => {
+interface ShowTodoProps {
+    todoList: actions.TodoInput[]
+}
 
-    const [todoList, setTodoList] = useState<actions.TodoInput[]>([])
+const ShowTodo = ({todoList}: ShowTodoProps) => {
+
+    /* const [todo_list, setTodo_list] = useState<actions.TodoInput[]>(todoList)
 
     const handleRefresh = async () => {
-        setTodoList(await actions.getTodos())
-    }
+        setTodo_list(await actions.getTodos())
+    } */
 
     return (
         <>
-            <button onClick={handleRefresh} style={{ padding: '10px 20px', fontSize: '16px' }}>
+            {/* <button onClick={handleRefresh} style={{ padding: '10px 20px', fontSize: '16px' }}>
                 {<FaCheck style={{ marginRight: '8px' }} />}
                 Refresh
-            </button>
+            </button> */}
 
-            
-                
-            <div className="flex flex-col gap-5 items-center justify-center mt-10 w-screen px-4">
+            <div className="flex flex-col gap-5 items-center justify-center mt-10 px-4">
                 {todoList.length == 0 && (
                     <div className="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50 dark:bg-gray-800 dark:text-yellow-300" role="alert">
                         <span className="font-medium">Alert!</span> Todo list is empty.

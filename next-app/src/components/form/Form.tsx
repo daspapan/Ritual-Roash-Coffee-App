@@ -1,5 +1,6 @@
 "use client"
 
+import clsx from 'clsx';
 import { useRef } from 'react';
 import React, { ReactNode } from 'react'
 
@@ -10,7 +11,7 @@ interface FormProps {
     onSubmit?: () => void;
 }
 
-const Form = ({children, action, onSubmit}:FormProps) => {
+const Form = ({children, action, classname, onSubmit}:FormProps) => {
     const ref = useRef<HTMLFormElement>(null);
     return (
         <form action={
@@ -18,7 +19,7 @@ const Form = ({children, action, onSubmit}:FormProps) => {
                 await action(FormData);
                 ref.current?.reset()
             }
-        } onSubmit={onSubmit} ref={ref}>
+        } onSubmit={onSubmit} className={clsx(classname)} ref={ref}>
             {children}
         </form>
     )

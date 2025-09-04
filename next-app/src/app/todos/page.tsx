@@ -6,34 +6,43 @@ import Link from 'next/link';
 import { HiRefresh } from 'react-icons/hi';
 import DefaultButton from '@/components/button/DefaultButton';
 import ShowTodo from '@/components/todos/ShowTodo';
+import UploadTodo from '@/components/todos/UploadAttachment';
+import NavBar from '@/components/navbar/NavBar';
+import { NextPage } from 'next';
 
-const TodoPage = async () => {
 
-    let data: actions.TodoInput[] = []
-    
+type PageProps = {
+    params?: Promise<Record<string, string | string[] | undefined>>; // For dynamic routes
+    searchParams?: Promise<Record<string, string | string[] | undefined>>; // For URL query parameters
+};
+
+const TodosPage: NextPage<PageProps> = async ({ params, searchParams }) => {
+// export default async function TodosPage({ searchParams }: PageProps) { //  { searchParams: { page?: string } }
+
+    const currentPage = await searchParams;
+    // console.log("[CURRENT PAGE]", currentPage)
+    const todoList: actions.TodoInput[] = await actions.getTodos();
+
+    // let todoList: actions.TodoInput[] = await actions.getTodos();
+    // console.log(todoList)
 
 
     return (
-         <main className="w-screen py-20 flex justify-center flex-col items-center">
-            <Link href={'/'}>
-                <span className="text-4xl font-extrabold uppercase">Home Page</span>
-            </Link>
-            
-            <div className="flex justify-center flex-col items-center">
 
-                <AddTodo />
-
-                <hr className="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded-sm md:my-10 dark:bg-gray-700"/>
-
-                <ShowTodo />
+        <main className="flex flex-col md:flex-row min-h-screen">
                 
-                
+            <div className="flex-1 p-4">
+                <AddTodo /> 
             </div>
 
             
-            
+            <div className="flex-1 p-4">
+                <ShowTodo todoList={todoList} />
+            </div>
+
         </main>
+
     )
 }
 
-export default TodoPage
+export default TodosPage

@@ -15,6 +15,8 @@ const eslintConfig = [
     extends: ["next/core-web-vitals"],
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
+      "no-console": "off",
+      'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     },
   })
 ];
