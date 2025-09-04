@@ -93,8 +93,16 @@ export class VpcStack extends cdk.Stack {
             // All subnets that need S3 access without NAT Gateway
             subnets: [
                 { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
-                { subnetType: ec2.SubnetType.PRIVATE_ISOLATED }
+                { subnetType: ec2.SubnetType.PUBLIC }
             ],
+        });
+
+        new ec2.InterfaceVpcEndpoint(this, `${appName}-ApiGatewayEndpoint`, {
+            vpc: this.vpc,
+            service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
+            subnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
+            securityGroups: [this.privateSecurityGroup],
+            privateDnsEnabled: true,
         });
 
         // Note: If Fargate needs to pull images from ECR, you'll need ECR/ECR_DOCKER endpoints.

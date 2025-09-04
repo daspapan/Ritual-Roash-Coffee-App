@@ -2,15 +2,17 @@
   "globals": {
     "appName": "RRC",
     "hosting": {
-      "domainName": "ritualroashcoffee.com",
+      "domainName": "pratibhakanoo.com",
       "certificateArn": "ab52a4a1-7f88-4b63-94f5-dba136ecd2b9",
-      "ghTokenName": "github-token-4",
+      "ghTokenName": "github-token",
+      "ghToken": "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",
       "ghOwner": "daspapan",
-      "repo": "Ritual-Roash-Coffee-App",
+      "ghRepo": "Ritual-Roash-Coffee-App",
+      "ghBranch": "develop",
       "dbHost": "",
       "dbUser": "dbuser",
       "dbPass": "dbpass",
-      "dbName":"todoslist"
+      "dbName": "todoslist"
     }
   },
   "main": {
@@ -38,5 +40,9 @@
     "ap-south-1a",
     "ap-south-1b",
     "ap-south-1c"
-  ]
+  ],
+  "hosted-zone:account=919620897356:domainName=pratibhakanoo.com:region=ap-south-1": {
+    "Id": "/hostedzone/Z08596991MP98VX2WQTFM",
+    "Name": "pratibhakanoo.com."
+  }
 }

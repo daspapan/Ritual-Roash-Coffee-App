@@ -75,7 +75,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const secret = await getDbSecret(secretArn);
         const client = await getDbClient(secret, initialDbName);
 
-        console.log(`[Event Path/Method]: ${event.path}/${event.httpMethod}`);
+        console.log(`[Event Path/Method]: ${event.path} -> ${event.httpMethod}`);
 
         if (event.path === '/crud/ping' && event.httpMethod === 'GET') {
 
@@ -126,25 +126,65 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
                 body: JSON.stringify({ message: 'Product read successfully', products: result.rows }),
             };
 
-        } else if (event.path === '/crud/read-all' && event.httpMethod === 'GET') { 
+        } else if (event.path.startsWith('/crud/') && event.httpMethod === 'GET') { 
+
+            // Get product by ID
+            const productId = event.pathParameters?.id; // Assuming /products/{id} path
+            if (!productId || isNaN(parseInt(productId))) {
+                return { statusCode: 400, body: JSON.stringify({ message: 'Invalid CRUD Operation ID.' }) };
+            }
+
+            const result = await client.query('SELECT * FROM public.products WHERE id = $1;', [parseInt(productId)]);
+
+            if (result.rows.length === 0) {
+                return { statusCode: 404, body: JSON.stringify({ message: 'Product not found.' }) };
+            }
 
             return {
                 statusCode: 200,
-                body: JSON.stringify({ message: 'Read all successfully.' }),
+                body: JSON.stringify({ message: 'Read one item successfully.', products: result.rows[0]}),
             };
 
-        } else if (event.path === '/crud/update' && event.httpMethod === 'UPDATE') { 
+        } else if (event.path.startsWith('/crud/') && event.httpMethod === 'PUT') { 
+
+            // Get product by ID
+            const productId = event.pathParameters?.id; // Assuming /products/{id} path
+            if (!productId || isNaN(parseInt(productId))) {
+                return { statusCode: 400, body: JSON.stringify({ message: 'Invalid CRUD Operation ID.' }) };
+            }
+
+            // Update existing product
+            const body = JSON.parse(event.body || '{}');
+            const { name, description, price, imageUrl } = body;
+
+            const result = await client.query('UPDATE public.products SET name = $2, description = $3, price = $4, image_url = $5 WHERE id = $1 RETURNING *;', [parseInt(productId), name, description, price, imageUrl]);
+
+            if (result.rows.length === 0) {
+                return { statusCode: 404, body: JSON.stringify({ message: 'Product not found.' }) };
+            }
 
             return {
                 statusCode: 200,
-                body: JSON.stringify({ message: 'Update successfully.' }),
+                body: JSON.stringify({ message: 'Update successfully.', products: result.rows[0]}),
             };
 
-        } else if (event.path === '/crud/delete' && event.httpMethod === 'DELETE') { 
+        } else if (event.path.startsWith('/crud/') && event.httpMethod === 'DELETE') { 
+
+            // Get product by ID
+            const productId = event.pathParameters?.id; // Assuming /products/{id} path
+            if (!productId || isNaN(parseInt(productId))) {
+                return { statusCode: 400, body: JSON.stringify({ message: 'Invalid CRUD Operation ID.' }) };
+            }
+
+            const result = await client.query('DELETE FROM public.products WHERE id = $1 RETURNING *;', [parseInt(productId)]);
+
+            if (result.rows.length === 0) {
+                return { statusCode: 404, body: JSON.stringify({ message: 'Product not found.' }) };
+            }
 
             return {
                 statusCode: 200,
-                body: JSON.stringify({ message: 'Delete successfully.' }),
+                body: JSON.stringify({ message: 'Delete successfully.', products: result.rows[0]}),
             };
 
         }

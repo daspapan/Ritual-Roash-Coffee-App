@@ -1,37 +1,61 @@
 {
   "RRC-Dev-VpcStack": {
-    "ExportsOutputRefRRCDevVPCPrivateForFargateSubnet1Subnet1449B03C0239E10C": "subnet-08372010943acac50",
-    "ExportsOutputFnGetAttRRCDevPrivateSG83883359GroupId691A84A3": "sg-0296afce921024e20",
-    "ExportsOutputRefRRCDevVPCPrivateForFargateSubnet2Subnet0318CF34A1F00003": "subnet-06d94123a5b22f75f",
-    "VpcId": "vpc-0b5e67cbaca722e33",
-    "ExportsOutputFnGetAttRRCDevIsolatedSG8C5A805BGroupId0BF6E94B": "sg-0a54a95cb72028caf",
-    "ExportsOutputRefRRCDevVPCIsolatedForRDSSubnet1SubnetFFCD7888F5058AA9": "subnet-056baee7d3c2f3e5b",
-    "ExportsOutputRefRRCDevVPCIsolatedForRDSSubnet2Subnet4B0E913D684A314D": "subnet-0366bb3206c456630"
+    "ExportsOutputRefRRCDevVPCPrivateForFargateSubnet1Subnet1449B03C0239E10C": "subnet-0624ad6f7dd8ed6f7",
+    "ExportsOutputFnGetAttRRCDevPrivateSG83883359GroupId691A84A3": "sg-0713ae5daa62e6441",
+    "ExportsOutputRefRRCDevVPCPrivateForFargateSubnet2Subnet0318CF34A1F00003": "subnet-05356606251600087",
+    "VpcId": "vpc-09ecd9b9ed4b4d725",
+    "ExportsOutputFnGetAttRRCDevPublicSG1E0D8AD4GroupId6A72C13F": "sg-0c67572f1533d1f23",
+    "ExportsOutputRefRRCDevVPC1622649FFC31FEF2": "vpc-09ecd9b9ed4b4d725",
+    "ExportsOutputFnGetAttRRCDevIsolatedSG8C5A805BGroupId0BF6E94B": "sg-00fbf45ab1ab7ee39",
+    "ExportsOutputRefRRCDevVPCPublicSubnet2Subnet76B744BDDD8721FE": "subnet-0d9f269cc0a45d159",
+    "ExportsOutputRefRRCDevVPCPublicSubnet1Subnet9F70177D413EF85E": "subnet-011928aeda02429a4",
+    "ExportsOutputRefRRCDevVPCIsolatedForRDSSubnet1SubnetFFCD7888F5058AA9": "subnet-07d0f69ecd9587993",
+    "ExportsOutputRefRRCDevVPCIsolatedForRDSSubnet2Subnet4B0E913D684A314D": "subnet-01f7ee01c7add5432"
   },
   "RRC-Dev-AppRdsSecretStack": {
     "ExportsOutputFnGetAttRRCDevPostgresDB8FA7F1D1EndpointPortF977FD87": "5432",
     "RdsEndpointAddress": "rrc-dev-db-instance.c6rebnexgqyq.ap-south-1.rds.amazonaws.com",
-    "ExportsOutputRefRRCDevDBSecret399F8A93F12E35DE": "arn:aws:secretsmanager:ap-south-1:919620897356:secret:RRC-Dev-db-credentials-a4GVc5",
-    "RdsSecretArn": "arn:aws:secretsmanager:ap-south-1:919620897356:secret:RRC-Dev-db-credentials-a4GVc5",
+    "ExportsOutputRefRRCDevDBSecret399F8A93F12E35DE": "arn:aws:secretsmanager:ap-south-1:919620897356:secret:RRC-Dev-db-credentials-WUoYJh",
+    "RdsSecretArn": "arn:aws:secretsmanager:ap-south-1:919620897356:secret:RRC-Dev-db-credentials-WUoYJh",
     "ExportsOutputFnGetAttRRCDevPostgresDB8FA7F1D1EndpointAddressF6CDE132": "rrc-dev-db-instance.c6rebnexgqyq.ap-south-1.rds.amazonaws.com"
   },
   "RRC-Dev-AppImageLambdaStack": {
-    "HealthHandlerLambdaName": "RRC-Dev-AppImageLambdaSta-RRCDevPingHandlerLambda6-eKeQsQgHQocr",
-    "ExportsOutputFnGetAttRRCDevPingHandlerLambda619AF1B2ArnDF358620": "arn:aws:lambda:ap-south-1:919620897356:function:RRC-Dev-AppImageLambdaSta-RRCDevPingHandlerLambda6-eKeQsQgHQocr",
-    "ExportsOutputFnGetAttRRCDevImageHandlerLambdaDAD4F86BArn8FEB62DE": "arn:aws:lambda:ap-south-1:919620897356:function:RRC-Dev-AppImageLambdaSta-RRCDevImageHandlerLambda-RWX5MMACIEfh",
-    "ImageHandlerLambdaName": "RRC-Dev-AppImageLambdaSta-RRCDevImageHandlerLambda-RWX5MMACIEfh",
-    "ImageBucketName": "rrc-dev-my-product-images-919620897356-ap-south-1"
+    "HealthHandlerLambdaName": "RRC-Dev-AppImageLambdaSta-RRCDevPingHandlerLambda6-pd2gM2Ya4kQ5",
+    "ExportsOutputFnGetAttRRCDevPingHandlerLambda619AF1B2ArnDF358620": "arn:aws:lambda:ap-south-1:919620897356:function:RRC-Dev-AppImageLambdaSta-RRCDevPingHandlerLambda6-pd2gM2Ya4kQ5"
   },
   "RRC-Dev-AppDbInitLambdaRoleStack": {
-    "ExportsOutputRefRRCDevPgLambdaCBC75CEDF7ED865A": "arn:aws:lambda:ap-south-1:919620897356:layer:RRCDevPgLambdaCBC75CED:3",
-    "ExportsOutputFnGetAttRRCDevDbInitializerLambdaRoleCD1CA53FArnB6B45028": "arn:aws:iam::919620897356:role/RRC-Dev-AppDbInitLambdaRo-RRCDevDbInitializerLambda-Epj5pq80mHkC"
+    "ExportsOutputRefRRCDevPgLambdaCBC75CEDF7ED865A": "arn:aws:lambda:ap-south-1:919620897356:layer:RRCDevPgLambdaCBC75CED:31",
+    "ExportsOutputFnGetAttRRCDevDbInitializerLambdaRoleCD1CA53FArnB6B45028": "arn:aws:iam::919620897356:role/RRC-Dev-AppDbInitLambdaRo-RRCDevDbInitializerLambda-8o6qydCMBjGm"
+  },
+  "RRC-Dev-UploadImageLambdaStack": {
+    "ExportsOutputRefRRCDevImageBucket1F17CCDDEE828D5F": "rrc-dev-my-images-919620897356-ap-south-1",
+    "ExportsOutputFnGetAttRRCDevImageHandlerLambdaDAD4F86BArn8FEB62DE": "arn:aws:lambda:ap-south-1:919620897356:function:RRC-Dev-UploadImageLambda-RRCDevImageHandlerLambda-UqazJvzv3Y0g",
+    "ExportsOutputFnGetAttRRCDevImageBucket1F17CCDDArnD721200F": "arn:aws:s3:::rrc-dev-my-images-919620897356-ap-south-1",
+    "ImageHandlerLambdaName": "RRC-Dev-UploadImageLambda-RRCDevImageHandlerLambda-UqazJvzv3Y0g",
+    "UploadBucketName": "rrc-dev-my-images-919620897356-ap-south-1"
   },
   "RRC-Dev-PgCrudOpsLambdaStack": {
-    "ExportsOutputFnGetAttRRCDevPgCrudOpsHandlerLambda3D08CEABArn0F8CCAA4": "arn:aws:lambda:ap-south-1:919620897356:function:RRC-Dev-PgCrudOpsLambdaSt-RRCDevPgCrudOpsHandlerLa-Sdde53useAz9",
-    "PgCrudOpsHandlerLambdaName": "RRC-Dev-PgCrudOpsLambdaSt-RRCDevPgCrudOpsHandlerLa-Sdde53useAz9"
+    "ExportsOutputFnGetAttRRCDevPgCrudOpsHandlerLambda3D08CEABArn0F8CCAA4": "arn:aws:lambda:ap-south-1:919620897356:function:RRC-Dev-PgCrudOpsLambdaSt-RRCDevPgCrudOpsHandlerLa-fpoWqZjyWPpW",
+    "PgCrudOpsHandlerLambdaName": "RRC-Dev-PgCrudOpsLambdaSt-RRCDevPgCrudOpsHandlerLa-fpoWqZjyWPpW"
+  },
+  "RRC-Dev-FargateStack": {
+    "ExportsOutputFnGetAttRRCDevfargateprivaterepo8F322E8EArn8B3974B0": "arn:aws:ecr:ap-south-1:919620897356:repository/my-todo-nextjs-app",
+    "FargateServiceArn": "arn:aws:ecs:ap-south-1:919620897356:service/RRC-Dev-app-cluster/RRC-Dev-FargateStack-RRCDevFargateService6A67F136-ZiSupmTSE7nr",
+    "ExportsOutputRefRRCDevClusterD2DB9E0DD4666245": "RRC-Dev-app-cluster",
+    "AlbDnsNameOutput": "RRC-De-RRCDe-6A3CBq1ASzkc-463442833.ap-south-1.elb.amazonaws.com",
+    "ExportsOutputRefRRCDevfargateprivaterepo8F322E8E91C31A39": "my-todo-nextjs-app",
+    "AlbArnOutput": "arn:aws:elasticloadbalancing:ap-south-1:919620897356:loadbalancer/app/RRC-De-RRCDe-6A3CBq1ASzkc/80a0c79559af7c54",
+    "ListenerArnOutput": "arn:aws:elasticloadbalancing:ap-south-1:919620897356:listener/app/RRC-De-RRCDe-6A3CBq1ASzkc/80a0c79559af7c54/ca56531e3f1f98d7",
+    "ExportsOutputFnGetAttRRCDevFargateService6A67F136Name8B77C08F": "RRC-Dev-FargateStack-RRCDevFargateService6A67F136-ZiSupmTSE7nr",
+    "RepositoryEcrUri": "919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app",
+    "FargateServiceName": "RRC-Dev-FargateStack-RRCDevFargateService6A67F136-ZiSupmTSE7nr"
+  },
+  "RRC-Dev-TodosCrudOpsLambdaStack": {
+    "ExportsOutputFnGetAttRRCDevTodosCrudOpsHandlerLambda78893C25ArnE797C330": "arn:aws:lambda:ap-south-1:919620897356:function:RRC-Dev-TodosCrudOpsLambd-RRCDevTodosCrudOpsHandle-3VIqAJbWHkcz",
+    "TodosCrudOpsHandlerLambdaName": "RRC-Dev-TodosCrudOpsLambd-RRCDevTodosCrudOpsHandle-3VIqAJbWHkcz"
   },
   "RRC-Dev-ApiGateway": {
-    "ApiGatewayEndpoint": "https://n4u4sy7r17.execute-api.ap-south-1.amazonaws.com/dev/",
-    "RRCDevProductImageApiEndpointB2E09B90": "https://n4u4sy7r17.execute-api.ap-south-1.amazonaws.com/dev/"
+    "ApiGatewayEndpoint": "https://c81cwg1inl.execute-api.ap-south-1.amazonaws.com/dev/",
+    "RRCDevProductImageApiEndpointB2E09B90": "https://c81cwg1inl.execute-api.ap-south-1.amazonaws.com/dev/"
   }
 }

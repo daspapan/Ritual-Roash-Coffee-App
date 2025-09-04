@@ -17,10 +17,10 @@ export interface ImageStackProps extends cdk.StackProps {
 
 export class ImageStack extends cdk.Stack {
 
-    public readonly imageHandlerLambda: Function;
+    // public readonly imageHandlerLambda: Function;
     public readonly pingHandlerLambda: Function;
     public readonly pingNodeJsHandlerLambda: NodejsFunction;
-    public readonly imageBucket: s3.Bucket;
+    // public readonly imageBucket: s3.Bucket;
     // public readonly nodeJsLayer: LayerVersion;
 
     constructor(scope: Construct, id: string, props: ImageStackProps, context: CDKContext){
@@ -34,7 +34,7 @@ export class ImageStack extends cdk.Stack {
 
 
         // S3 Bucket for images
-        this.imageBucket = new s3.Bucket(this, `${appName}-ProductImageBucket`, {
+        /* this.imageBucket = new s3.Bucket(this, `${appName}-ProductImageBucket`, {
             bucketName: `${appName.toLocaleLowerCase()}-my-product-images-${this.account}-${this.region}`, // Unique name
             blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL, // Highly recommended for private buckets
             removalPolicy: cdk.RemovalPolicy.DESTROY, // For dev, change to RETAIN for prod
@@ -68,7 +68,7 @@ export class ImageStack extends cdk.Stack {
             memorySize: 128,
             role: imageHandlerLambdaRole,
             architecture: Architecture.ARM_64,
-        });
+        }); */
 
         this.pingHandlerLambda = new Function(this, `${appName}-PingHandlerLambda`, {
             runtime: Runtime.NODEJS_20_X,
@@ -112,10 +112,16 @@ export class ImageStack extends cdk.Stack {
         });*/
 
 
-        /* curl --progress-bar -X POST -H "Content-Type: application/json" -d '{"fileName": "/Users/papandas/Desktop/papan.png", "contentType": "image/jpeg", "productId": "1", content: "Hell"}' https://wpsj4zfwfc.execute-api.ap-south-1.amazonaws.com/dev/media/upload-url | jq . */
+        /* 
+        
+        curl --progress-bar -X POST -H "Content-Type: application/json" -d '{"fileName": "/Users/papandas/Desktop/papan.png", "contentType": "image/jpeg", "productId": "1", content: "Hell"}' https://wpsj4zfwfc.execute-api.ap-south-1.amazonaws.com/dev/media/upload-url | jq . 
+        
+        curl --location 'https://xqo1yr5gf5.execute-api.ap-south-1.amazonaws.com/dev/media/upload-url' --header 'Content-Type: multipart/form-data' --form 'fileName="papan"' --form 'content=@"/Users/papandas/Desktop/Screenshot 2025-08-06 at 2.40.49 PM.png"' --form 'productId="123"' | jq .
+        
+        */
 
-        new cdk.CfnOutput(this, 'ImageBucketName', { value: this.imageBucket.bucketName });
-        new cdk.CfnOutput(this, 'ImageHandlerLambdaName', { value: this.imageHandlerLambda.functionName });
+        // new cdk.CfnOutput(this, 'ImageBucketName', { value: this.imageBucket.bucketName });
+        // new cdk.CfnOutput(this, 'ImageHandlerLambdaName', { value: this.imageHandlerLambda.functionName });
         new cdk.CfnOutput(this, 'HealthHandlerLambdaName', {value: this.pingHandlerLambda.functionName})
 
     }

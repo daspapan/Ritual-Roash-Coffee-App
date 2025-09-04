@@ -11,6 +11,13 @@ import { ApiGwStack } from '../lib/apigw-stack';
 import { RdsStack } from '../lib/rds-stack';
 import { DbInitLambdaStack } from '../lib/db-init-stack';
 import { PgCrudStack } from '../lib/pgcrud-stack';
+import { S3Stack } from '../lib/s3-stack';
+import { FargateStack } from '../lib/fargate-v2-stack';
+import { HostingStack } from '../lib/hosting-stack';
+import { AlbListenerStack } from '../lib/alb-listener-stack';
+import { TodoCrudStack } from '../lib/todocrud-stack';
+import { PipelineStack } from '../lib/pipeline-stack';
+import { AuthStack } from '../lib/auth-stack';
 
 const app = new cdk.App();
 
@@ -37,6 +44,9 @@ console.log(`Context -> ${JSON.stringify(context)}`);
 const appName = `${context.appName}-${context.stage}`
 const stackName = `${appName}-Stack`
 
+ // [vpcStack] -> [rdsStack] -> [imageStack] -> [dbInitLambdaStack] -> [s3Stack] -> [pgCrudOpsStack] -> [apiStack]
+
+
 
 // 1. Virtual Private Cloud
 const vpcStack = new VpcStack(app, `${appName}-VpcStack`, { stackName: `${appName}-VpcStack`, env: context.env }, context)
@@ -56,6 +66,8 @@ const rdsStack = new RdsStack(
 );
 // Ensure RDS is deployed after VPC
 rdsStack.addDependency(vpcStack);
+
+
 
 
 
@@ -98,6 +110,24 @@ dbInitLambdaStack.addDependency(imageStack);
 
 
 
+
+const s3Stack = new S3Stack(
+    app,
+    `${appName}-UploadImageLambdaStack`, 
+    {
+        stackName: `${appName}-UploadImageLambdaStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc, 
+        privateSecurityGroup: vpcStack.privateSecurityGroup, 
+        nodeJsLayer: dbInitLambdaStack.nodeJsLayer,
+    },
+    context
+)
+s3Stack.addDependency(dbInitLambdaStack)
+
+
+
+
 const pgCrudOpsStack = new PgCrudStack(
     app, 
     `${appName}-PgCrudOpsLambdaStack`, 
@@ -113,6 +143,23 @@ const pgCrudOpsStack = new PgCrudStack(
     context 
 )
 pgCrudOpsStack.addDependency(imageStack)
+
+
+const todosCrudOpsStack = new TodoCrudStack(
+    app, 
+    `${appName}-TodosCrudOpsLambdaStack`, 
+    {
+        stackName: `${appName}-TodosCrudOpsLambdaStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc, 
+        rdsSecret: rdsStack.rdsSecret,
+        privateSecurityGroup: vpcStack.privateSecurityGroup, 
+        nodeJsLayer: dbInitLambdaStack.nodeJsLayer,
+        dbInitializerLambdaRole: dbInitLambdaStack.dbInitializerLambdaRole
+    }, 
+    context 
+)
+todosCrudOpsStack.addDependency(pgCrudOpsStack)
 
 
 /*const infraStack = new InfraStack(
@@ -135,13 +182,76 @@ const apiStack = new ApiGwStack(
     { 
         stackName: `${appName}-ApiGateway`, 
         env: context.env, 
-        imageHandlerLambda: imageStack.imageHandlerLambda,
+        imageHandlerLambda: s3Stack.imageHandlerLambda,
         pingHandlerLambda: imageStack.pingHandlerLambda,
         // pingNodeJsHandlerLambda: imageStack.pingNodeJsHandlerLambda,
         pgCrudOpsHandlerLambda: pgCrudOpsStack.pgCrudOpsHandlerLambda,
+        todosCrudOpsHandlerLambda: todosCrudOpsStack.todoCrudOpsHandlerLambda,
     }, 
     context
 )
 // apiStack.addDependency(imageStack)
 apiStack.addDependency(pgCrudOpsStack)
+
+
+const authStack = new AuthStack(
+    app,
+    `${appName}-AuthStack`,
+    {
+        stackName: `${appName}-AuthStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc,
+    },
+    context
+)
+authStack.addDependency(s3Stack)
+
+
+
+const fargateStack = new FargateStack(
+    app,
+    `${appName}-FargateStack`, 
+    {
+        stackName: `${appName}-FargateStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc,
+        privateSecurityGroup: vpcStack.privateSecurityGroup, 
+        publicSecurityGroup: vpcStack.publicSecurityGroup,
+        rdsInstance: rdsStack.rdsInstance,
+        rdsSecret: rdsStack.rdsSecret,
+        mediaBucket: s3Stack.uploadBucket,
+    },
+    context
+)
+fargateStack.addDependency(fargateStack)
+
+
+
+/* const hostingStack = new HostingStack(
+    app,
+    `${appName}-HostingStack`, 
+    {
+        stackName: `${appName}-HostingStack`, 
+        env: context.env, 
+        alb: fargateStack.alb,
+    },
+    context
+)
+hostingStack.addDependency(fargateStack) */
+
+
+
+
+const pipelineStack  = new PipelineStack(
+    app,
+    `${appName}-PipelineStack`, 
+    {
+        stackName: `${appName}-PipelineStack`, 
+        env: context.env, 
+        ecrRepository: fargateStack.ecrRepository,
+        fargateService: fargateStack.fargateService,
+    },
+    context
+)
+pipelineStack.addDependency(fargateStack)
 

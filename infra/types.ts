@@ -10,8 +10,10 @@ export type CDKContext = {
         domainName: string
         certificateArn: string
         ghTokenName: string
+        ghToken: string
         ghOwner: string
-        repo: string
+        ghBranch: string
+        ghRepo: string
         dbHost: string
         dbUser: string
         dbPass: string

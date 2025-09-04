@@ -113,6 +113,7 @@ export class DbInitLambdaStack extends Stack {
                         image_url VARCHAR(2048),
                         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                     );`,
+                    
                     `CREATE TABLE IF NOT EXISTS public.images (
                         id SERIAL PRIMARY KEY,
                         product_id INTEGER REFERENCES public.products(id),
@@ -120,10 +121,34 @@ export class DbInitLambdaStack extends Stack {
                         upload_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                     );`,
 
+                    `CREATE TYPE "TodoStatus" AS ENUM ('TODO', 'IN_PROGRESS', 'DONE');`,
+                    `CREATE TYPE "TodoPriority" AS ENUM ('LOW', 'MEDIUM', 'HIGH');`,
+                    `CREATE TYPE "TodoAttachFileType" AS ENUM ('LOCAL', 'S3');`,
+                    `CREATE TABLE IF NOT EXISTS public.todos (
+                        id SERIAL PRIMARY KEY,
+                        title TEXT NOT NULL,
+                        description TEXT,
+                        start_date TIMESTAMP,
+                        due_date TIMESTAMP,
+                        status "TodoStatus" NOT NULL DEFAULT 'TODO',
+                        priority "TodoPriority" NOT NULL DEFAULT 'LOW',
+                        assignee TEXT NOT NULL DEFAULT 'self',
+                        remark TEXT,
+                        content_type TEXT,
+                        storage "TodoAttachFileType" NOT NULL DEFAULT 'LOCAL',
+                        attachment TEXT DEFAULT NULL,
+                        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+                    );`,
+
+
                     // Grant privileges on tables/sequences in public schema for app_user
                     // These grants must happen *after* the tables are created.
                     `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app_user;`,
                     `GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO app_user;`, // For SERIAL columns
+
+                    // `GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA todos TO app_user;`,
+                    // `GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA todos TO app_user;`, // For SERIAL columns
                 ],
             },
         });

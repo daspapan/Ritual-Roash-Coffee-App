@@ -9,8 +9,8 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 export interface ApiGwStackProps extends cdk.StackProps {
     imageHandlerLambda: Function; // For Lambda
     pingHandlerLambda: Function;
-    // pingNodeJsHandlerLambda?: NodejsFunction;
     pgCrudOpsHandlerLambda: Function;
+    todosCrudOpsHandlerLambda: Function;
 }
 
 export class ApiGwStack extends cdk.Stack {
@@ -32,6 +32,7 @@ export class ApiGwStack extends cdk.Stack {
                 stageName: `${appStage.toLocaleLowerCase()}`,
             },
             endpointTypes: [apigw.EndpointType.REGIONAL],
+            binaryMediaTypes: ['*/*'], // Essential for API Gateway to correctly handle binary types
         });
         
 
@@ -40,41 +41,41 @@ export class ApiGwStack extends cdk.Stack {
         pingResource.addMethod('GET', healthIntegration);
 
 
-        // 
-        // Integration for CRUD Operation on PostgreSQL Database
-        //
-        // const pgCrudIntegration = new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda);
-        // const pgPingResource = this.api.root.addResource('crud').addResource('ping');
-        // pgPingResource.addMethod('GET', pgCrudIntegration);
-        // const pgCreateResource = this.api.root.addResource('crud').addResource('create');
-        // pgCreateResource.addMethod('POST', pgCrudIntegration);
-        // const pgReadResource = this.api.root.addResource('crud').addResource('read');
-        // pgReadResource.addMethod('GET', pgCrudIntegration);
-        // const pgReadAllResource = this.api.root.addResource('crud').addResource('read-all');
-        // pgReadAllResource.addMethod('GET', pgCrudIntegration);
-        // const pgUpdateResource = this.api.root.addResource('crud').addResource('update');
-        // pgUpdateResource.addMethod('UPDATE', pgCrudIntegration);
-        // const pgDeleteResource = this.api.root.addResource('crud').addResource('delete');
-        // pgDeleteResource.addMethod('DELETE', pgCrudIntegration);
 
+        // PostgreSQL CRUD Handler
         const pgCrudIntegration = new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda)
-        const todosResource = this.api.root.addResource('crud');
-        const pgPingResource = todosResource.addResource('ping');
+        const pgCrudResource = this.api.root.addResource('crud');
+        const pgPingResource = pgCrudResource.addResource('ping');
         pgPingResource.addMethod('GET', pgCrudIntegration)
-        todosResource.addMethod('POST', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
-        todosResource.addMethod('GET', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
+        pgCrudResource.addMethod('POST', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
+        pgCrudResource.addMethod('GET', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
+
+        const pgCrudByIdResource = pgCrudResource.addResource('{id}');
+        pgCrudByIdResource.addMethod('GET', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
+        pgCrudByIdResource.addMethod('PUT', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
+        pgCrudByIdResource.addMethod('DELETE', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
+
+
+        // Todo's List CRUD Handler
+        const todosCrudIntegration = new apigw.LambdaIntegration(props.todosCrudOpsHandlerLambda)
+        const todosResource = this.api.root.addResource('todos');
+        const todosPingResource = todosResource.addResource('ping');
+        todosPingResource.addMethod('GET', todosCrudIntegration)
+        todosResource.addMethod('POST', todosCrudIntegration);
+        todosResource.addMethod('GET', todosCrudIntegration);
 
         const todoByIdResource = todosResource.addResource('{id}');
-        todoByIdResource.addMethod('GET', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
-        todoByIdResource.addMethod('PUT', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
-        todoByIdResource.addMethod('DELETE', new apigw.LambdaIntegration(props.pgCrudOpsHandlerLambda));
+        todoByIdResource.addMethod('GET', todosCrudIntegration);
+        todoByIdResource.addMethod('PUT', todosCrudIntegration);
+        todoByIdResource.addMethod('DELETE', todosCrudIntegration);
 
         
         // Integration for Image Handler Lambda
         const imagesIntegration = new apigw.LambdaIntegration(props.imageHandlerLambda);
-        const imagesUploadResource = this.api.root.addResource('media').addResource('upload-url');
-        imagesUploadResource.addMethod('PUT', imagesIntegration); // Get presigned upload URL
-        const imagesDownloadResource = this.api.root.addResource('image').addResource('download-url');
+        const mediaResource = this.api.root.addResource('media');
+        const imagesUploadResource = mediaResource.addResource('upload-url');
+        imagesUploadResource.addMethod('POST', imagesIntegration); // Get presigned upload URL
+        const imagesDownloadResource = mediaResource.addResource('download-url');
         imagesDownloadResource.addMethod('POST', imagesIntegration); // Get presigned download URL
         
         new cdk.CfnOutput(this, 'ApiGatewayEndpoint', {

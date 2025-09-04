@@ -16,7 +16,8 @@
     "lambda-build-image": "cd lib/lambda/image-handler && npm install && npm run build && cd .. && cd .. && cd .. && pwd",
     "lambda-build-rds": "cd lib/lambda/rds-handler && npm install && npm run build && cd .. && cd .. && cd .. && pwd",
     "lambda-build-pgCrud": "cd lib/lambda/pg-crud-handler && npm install && npm run build && cd .. && cd .. && cd .. && pwd",
-    "lambda-build": "npm run lambda-build-health && npm run lambda-build-health2 && npm run lambda-build-image && npm run lambda-build-rds && npm run lambda-build-pgCrud",
+    "lambda-build-todoCrud": "cd lib/lambda/todos-crud-handler && npm install && npm run build && cd .. && cd .. && cd .. && pwd",
+    "lambda-build": "npm run lambda-build-health && npm run lambda-build-health2 && npm run lambda-build-image && npm run lambda-build-rds && npm run lambda-build-pgCrud && npm run lambda-build-todoCrud",
     "deploy": "npm run lambda-build && cdk synth && cdk deploy --require-approval never --all --outputs-file ../cdk-outputs.json",
     "destroy": "cdk destroy --require-approval never --all",
     "push": "git add . && git commit -m 'backend push' && git push"
