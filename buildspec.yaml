@@ -35,7 +35,7 @@ phases:
       - echo Pushing the Docker images...
       - docker push 919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest
       - echo Writing image definitions file...
-      - printf '[{"name":"%s","imageUri":"%s"}]' "RRC-Dev-container" "919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest" > ./../imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "my-todo-nextjs-app" "919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest" > ./../imagedefinitions.json
 
 artifacts:
     files: imagedefinitions.json
