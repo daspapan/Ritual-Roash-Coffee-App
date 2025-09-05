@@ -31,5 +31,5 @@ docker tag ${DOCKER_IMG_APP_NAME}:${DOCKER_IMG_APP_VER} 919620897356.dkr.ecr.ap-
 docker push 919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest
 
 
-aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION_NAME --force-new-deployment
+# aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION_NAME --force-new-deployment
 

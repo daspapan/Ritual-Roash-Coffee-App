@@ -135,7 +135,7 @@ export class FargateStack extends cdk.Stack {
 
 
 
-        const certificate = acm.Certificate.fromCertificateArn(this, `${appName}-Certificate`, `arn:aws:acm:ap-south-1:919620897356:certificate/${context.hosting.certificateArn}`)
+        const certificate = acm.Certificate.fromCertificateArn(this, `${appName}-Certificate`, `arn:aws:acm:${context.env.region}:${context.env.account}:certificate/${context.hosting.certificateArn}`)
 
         this.alb = new elbv2.ApplicationLoadBalancer(this, `${appName}-ALB`, {
             vpc,
@@ -179,19 +179,29 @@ export class FargateStack extends cdk.Stack {
         // Accessing outputs
         new cdk.CfnOutput(this, 'AlbArnOutput', {
             value: this.alb.loadBalancerArn,
-            description: 'The ARN of the Application Load Balancer',
+            description: 'The ARN of the Application Load Balancer.',
         });
 
         new cdk.CfnOutput(this, 'AlbDnsNameOutput', {
             value: this.alb.loadBalancerDnsName,
-            description: 'The DNS name of the Application Load Balancer',
+            description: 'The DNS name of the Application Load Balancer.',
+        });
+
+        new cdk.CfnOutput(this, 'ClusterNameOutput', {
+            value: this.fargateService.cluster.clusterName,
+            description: 'The fargate cluster name.',
+        });
+
+        new cdk.CfnOutput(this, 'ServiceNameOutput', {
+            value: this.fargateService.serviceName,
+            description: 'The fargate service name.',
         });
 
         // Example of adding a listener and accessing its ARN
         // const listener = alb.addListener('HttpListener', { port: 80 });
         new cdk.CfnOutput(this, 'ListenerArnOutput', {
             value: listener.listenerArn,
-            description: 'The ARN of the ALB HTTP Listener',
+            description: 'The ARN of the ALB HTTP Listener.',
         });
 
     }

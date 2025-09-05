@@ -40,9 +40,5 @@
     "ap-south-1a",
     "ap-south-1b",
     "ap-south-1c"
-  ],
-  "hosted-zone:account=919620897356:domainName=pratibhakanoo.com:region=ap-south-1": {
-    "Id": "/hostedzone/Z08596991MP98VX2WQTFM",
-    "Name": "pratibhakanoo.com."
-  }
+  ]
 }

@@ -1,0 +1,213 @@
+import * as cdk from 'aws-cdk-lib';
+import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as ecr from 'aws-cdk-lib/aws-ecr';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import { Construct } from 'constructs';
+import { CDKContext } from '../types';
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as pipeline from 'aws-cdk-lib/pipelines';
+import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
+import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
+import * as codebuild from 'aws-cdk-lib/aws-codebuild';
+import * as codedeploy from 'aws-cdk-lib/aws-codedeploy';
+import { FargateStack } from './fargate-v2-stack';
+import { AuthStack } from './auth-stack';
+
+
+/* 
+GitHub Token : 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
+Source Youtube Video : https://www.youtube.com/watch?v=Z3YNjMxuN9U&t=683s
+*/
+
+
+/* 
+
+export interface PipelineV2StageProps extends cdk.StageProps {
+    stageName: string
+}
+
+export class PipelineV2Stage extends cdk.Stage {
+    constructor(scope: Construct, id: string, props: PipelineV2StageProps, context: CDKContext){
+        super(scope, id, props)
+
+        const appName = `${context.appName}-${context.stage}`;
+
+        new AuthStack(
+            this, 
+            `${appName}-AuthStack`, 
+            {
+                stackName: `${appName}-AuthStack`, 
+                env: context.env
+            }, 
+            context
+        )
+    }
+}
+
+*/
+
+
+export interface PipelineV2StackProps extends cdk.StackProps {
+    fargateService: ecs.FargateService;
+    ecrRepository: ecr.Repository;
+}
+
+export class PipelineV2Stack extends cdk.Stack {
+
+    public readonly githubSecret: secretsmanager.Secret;
+
+    constructor(scope: Construct, id: string, props: PipelineV2StackProps, context: CDKContext){
+        super(scope, id, props);
+
+        const appName = `${context.appName}-${context.stage}`;
+        const appStage = `${context.stage}`
+        const dbName = `${context.hosting.dbName}`
+        const tokenName = `${context.hosting.ghTokenName}`
+        const token = `${context.hosting.ghToken}`
+        const owner = `${context.hosting.ghOwner}`
+        const repo = `${context.hosting.ghRepo}`
+        const branch = `${context.hosting.ghBranch}` || 'main'
+
+        
+        const { fargateService, ecrRepository } = props;
+
+
+        // ─────────────────────────────────────────────────────────────
+        // CONFIG (change these for your repo/app)
+        // ─────────────────────────────────────────────────────────────
+        const github = {
+            owner,
+            repo,
+            branch,
+            // Create a secret in Secrets Manager named 'github-token' that contains your Personal Access Token
+            // with repo:read permissions (fine-grained PAT recommended).
+            oauthSecretName: 'github-token-1',
+        };
+
+
+        // ─────────────────────────────────────────────────────────────
+        // CODEBUILD PROJECT
+        // ─────────────────────────────────────────────────────────────
+        const project = new codebuild.PipelineProject(this, `${appName}-BuildProject`, {
+            environment: {
+                buildImage: codebuild.LinuxBuildImage.STANDARD_7_0,
+                privileged: true, // Docker-in-Docker
+            },
+            environmentVariables: {
+                ACCOUNT_ID: {value: context.env.account},
+                REGION: {value: context.env.region},
+                ECR_REPO_URI: { value: ecrRepository.repositoryUri },
+                CLUSTER_NAME: {value: fargateService.cluster.clusterName},
+                SERVICE_NAME: {value: fargateService.serviceName},
+                REPOSITORY_URI: { value: ecrRepository.repositoryUri },
+                CONTAINER_NAME: { value: "my-todo-nextjs-app" },
+            },
+            // Using buildspec file at repo root (below)
+            buildSpec: codebuild.BuildSpec.fromSourceFilename('buildspec.yaml'),
+            timeout: cdk.Duration.minutes(30),
+        });
+        ecrRepository.grantPullPush(project)
+
+        
+
+        // ─────────────────────────────────────────────────────────────
+        // CODEPIPELINE (GitHub OAuth → Build → ECS Deploy)
+        // ─────────────────────────────────────────────────────────────
+        const sourceOutput = new codepipeline.Artifact('SourceArtifact');
+        const buildOutput = new codepipeline.Artifact('BuildArtifact');
+
+        const oauthToken = secretsmanager.Secret.fromSecretNameV2(
+            this, 'GithubToken', github.oauthSecretName
+        );
+
+        const sourceAction = new codepipeline_actions.GitHubSourceAction({
+            actionName: 'GitHub_Source',
+            owner: github.owner,
+            repo: github.repo,
+            branch: github.branch,
+            oauthToken: oauthToken.secretValue,// cdk.SecretValue.secretsManager(github.oauthSecretName),
+            output: sourceOutput,
+            trigger: codepipeline_actions.GitHubTrigger.WEBHOOK,
+        });
+
+
+        const deployRole = new iam.Role(this, 'EcsDeployRole', {
+            assumedBy: new iam.ServicePrincipal('codepipeline.amazonaws.com'),
+        });
+
+        deployRole.addToPolicy(new iam.PolicyStatement({
+            actions: [
+                'ecs:DescribeServices',
+                'ecs:UpdateService',
+                'ecs:DescribeTaskDefinition',
+                'ecs:RegisterTaskDefinition',
+                'ecs:DeregisterTaskDefinition',
+                'ecr:*',
+                'cloudwatch:*',
+                'cloudformation:*', 's3:*', 'lambda:*', 'codepipeline:*'
+                // ... other necessary permissions for ECR, CloudWatch Logs, etc.
+            ],
+            resources: ['*'], // Scope down resources for production environments
+        }));
+
+        const buildRole = new iam.Role(this, 'CodeBuildDeployRole', {
+          assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com'),
+          inlinePolicies: {
+            // Grant necessary permissions for deployment, e.g., CloudFormation, S3, Lambda, etc.
+            DeploymentPermissions: new iam.PolicyDocument({
+              statements: [
+                new iam.PolicyStatement({
+                  actions: ['cloudformation:*', 's3:*', 'lambda:*', 'codepipeline:*'], // Adjust permissions based on your deployment needs
+                  resources: ['*'], // Scope down resources as much as possible for security
+                }),
+              ],
+            }),
+          },
+        });
+
+        const buildAction = new codepipeline_actions.CodeBuildAction({
+            actionName: 'Docker_Build_Push',
+            project,
+            input: sourceOutput,
+            outputs: [buildOutput],
+            role: buildRole
+        });
+
+
+        
+
+        const existingService : ecs.IBaseService = ecs.FargateService.fromFargateServiceAttributes(this, `${appName}-fargate-svc`, {cluster: fargateService.cluster, serviceArn: fargateService.serviceArn }); 
+
+        const deployAction = new codepipeline_actions.EcsDeployAction({
+            actionName: 'ECS_Deploy',
+            service: existingService,
+            input: buildOutput, // expects imagedefinitions.json
+            runOrder: 1,
+            // imageFile: buildOutput.atPath("imagedefinitions.json"),
+            deploymentTimeout: cdk.Duration.minutes(60),
+            role: deployRole,
+        });
+
+        new codepipeline.Pipeline(this, `${appName}-Pipeline`, {
+            pipelineType: codepipeline.PipelineType.V2,
+            stages: [
+                { stageName: 'Source', actions: [sourceAction] },
+                { stageName: 'Build', actions: [buildAction] },
+                { stageName: 'Deploy', actions: [deployAction] },
+            ], 
+        });
+
+        // ─────────────────────────────────────────────────────────────
+        // OUTPUTS
+        // ─────────────────────────────────────────────────────────────
+        new cdk.CfnOutput(this, 'GithubRepo', { value: `${github.owner}/${github.repo} (${github.branch})` });
+
+
+
+        // new cdk.CfnOutput(this, 'HealthHandlerLambdaName', {value: this.pingHandlerLambda.functionName})
+
+
+    }
+
+}

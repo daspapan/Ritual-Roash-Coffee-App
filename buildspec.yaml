@@ -1,13 +1,28 @@
 version: 0.2
 
 phases:
+  install:
+    commands:
+      - DATETIME=$(date +"%Y-%m-%d-%H-%M-%S")
+
   pre_build:
     commands:
       - cd next-app
       - echo Logging in to Amazon ECR...
       - aws --version
+      - ACCOUNT_IID=$(aws sts get-caller-identity --query Account --output text)
+      - echo '$ACCOUNT_IID'
+      - REGIONI=$(aws configure get region)
+      - echo '$REGIONI'
+      - IMAGE_TAGI=${CODEBUILD_RESOLVED_SOURCE_VERSION}
+      - echo '$IMAGE_TAGI'
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 919620897356.dkr.ecr.ap-south-1.amazonaws.com
-      - REPOSITORY_URI=919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app
+      - echo '$DATETIME'
+      - echo '$ACCOUNT_ID'
+      - echo '$SERVICE_NAME'
+      - echo '$CONTAINER_NAME'
+      - echo '$REPOSITORY_URI'
+      - echo '$TIMESTAMP'
   build:
     commands:
       - echo Build started on `date`

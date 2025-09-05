@@ -16,7 +16,7 @@ import { FargateStack } from '../lib/fargate-v2-stack';
 import { HostingStack } from '../lib/hosting-stack';
 import { AlbListenerStack } from '../lib/alb-listener-stack';
 import { TodoCrudStack } from '../lib/todocrud-stack';
-import { PipelineStack } from '../lib/pipeline-stack';
+import { PipelineV2Stack } from '../lib/pipeline-v2-stack';
 import { AuthStack } from '../lib/auth-stack';
 
 const app = new cdk.App();
@@ -242,16 +242,16 @@ hostingStack.addDependency(fargateStack) */
 
 
 
-const pipelineStack  = new PipelineStack(
+const pipelineV2Stack  = new PipelineV2Stack(
     app,
-    `${appName}-PipelineStack`, 
+    `${appName}-PipelineV2Stack`, 
     {
-        stackName: `${appName}-PipelineStack`, 
+        stackName: `${appName}-PipelineV2Stack`, 
         env: context.env, 
         ecrRepository: fargateStack.ecrRepository,
         fargateService: fargateStack.fargateService,
     },
     context
 )
-pipelineStack.addDependency(fargateStack)
+pipelineV2Stack.addDependency(fargateStack)
 
