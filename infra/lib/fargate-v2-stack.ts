@@ -66,6 +66,7 @@ export class FargateStack extends cdk.Stack {
         const cluster = new ecs.Cluster(this, `${appName}-Cluster`, {
             vpc: vpc,
             clusterName: `${appName}-app-cluster`,
+            enableFargateCapacityProviders: true, // fresh added.
         });
 
 

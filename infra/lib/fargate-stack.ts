@@ -133,6 +133,8 @@ export class FargateStack extends cdk.Stack {
             description: 'The URL of the application load balancer',
         });
 
+        
+
     }
 
 }

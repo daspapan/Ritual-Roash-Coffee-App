@@ -47,17 +47,114 @@ const stackName = `${appName}-Stack`
  // [vpcStack] -> [rdsStack] -> [imageStack] -> [dbInitLambdaStack] -> [s3Stack] -> [pgCrudOpsStack] -> [apiStack]
 
 
+// 1. Virtual Private Cloud
+const vpcStack = new VpcStack(app, `${appName}-VpcStack`, { stackName: `${appName}-VpcStack`, env: context.env }, context)
+
+
+// 2. RDS PostgreSQL Database
+const rdsStack = new RdsStack(
+    app, 
+    `${appName}-AppRdsStack`, {
+        stackName: `${appName}-AppRdsSecretStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc,
+        isolatedSecurityGroup: vpcStack.isolatedSecurityGroup,
+    },
+    context
+);
+rdsStack.addDependency(vpcStack);
+
+
+// 3. Database Initializer Lambda (Custom Resource)
+const dbInitLambdaStack = new DbInitLambdaStack(
+    app, 
+    `${appName}-AppDbInitLambdaStack`, 
+    {
+        stackName: `${appName}-AppDbInitLambdaRoleStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc,
+        rdsInstance: rdsStack.rdsInstance,
+        rdsSecret: rdsStack.rdsSecret,
+        privateSecurityGroup: vpcStack.privateSecurityGroup,
+        isolatedSecurityGroup: vpcStack.isolatedSecurityGroup,
+        // nodeJsLayer: imageStack.nodeJsLayer,
+    },
+    context
+); 
+// Ensure DB initialization happens after RDS is ready
+dbInitLambdaStack.addDependency(rdsStack); 
 
 
 
-new PipelineV2Stack(
+// 4. S3 Bucket
+const s3Stack = new S3Stack(
+    app,
+    `${appName}-UploadImageLambdaStack`, 
+    {
+        stackName: `${appName}-UploadImageLambdaStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc, 
+        privateSecurityGroup: vpcStack.privateSecurityGroup, 
+        nodeJsLayer: dbInitLambdaStack.nodeJsLayer,
+    },
+    context
+)
+s3Stack.addDependency(dbInitLambdaStack)
+
+
+
+// 5. Cognito
+const authStack = new AuthStack(
+    app,
+    `${appName}-AuthStack`,
+    {
+        stackName: `${appName}-AuthStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc,
+    },
+    context
+)
+authStack.addDependency(s3Stack)
+
+
+
+// 6. Fargate 
+const fargateStack = new FargateStack(
+    app,
+    `${appName}-FargateStack`, 
+    {
+        stackName: `${appName}-FargateStack`, 
+        env: context.env, 
+        vpc: vpcStack.vpc,
+        privateSecurityGroup: vpcStack.privateSecurityGroup, 
+        publicSecurityGroup: vpcStack.publicSecurityGroup,
+        rdsInstance: rdsStack.rdsInstance,
+        rdsSecret: rdsStack.rdsSecret,
+        mediaBucket: s3Stack.uploadBucket,
+    },
+    context
+)
+fargateStack.addDependency(authStack)
+
+
+
+// 7. Pipeline
+const pipelineV2Stack = new PipelineV2Stack(
     app,
     `${appName}-PipelineV2Stack`, 
     {
         stackName: `${appName}-PipelineV2Stack`, 
         env: context.env,
+        fargateService: fargateStack.fargateService,
+        ecrRepository: fargateStack.ecrRepository,
+        vpc: vpcStack.vpc,
+        privateSecurityGroup: vpcStack.privateSecurityGroup, 
+        publicSecurityGroup: vpcStack.publicSecurityGroup,
+        rdsInstance: rdsStack.rdsInstance,
+        rdsSecret: rdsStack.rdsSecret,
+        mediaBucket: s3Stack.uploadBucket,
     },
     context
 )
-
+pipelineV2Stack.addDependency(fargateStack)
 

@@ -21,22 +21,39 @@ phases:
       - echo $ACCOUNT_ID
       - echo $SERVICE_NAME
       - echo $CONTAINER_NAME
-      - echo $REPOSITORY_URI
       - echo $TIMESTAMP
+      - REPOSITORY_URI=919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app
+      - echo $REPOSITORY_URI
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - echo $IMAGE_TAG
   build:
     commands:
+      - echo Build started on $DATETIME
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -t my-todo-nextjs-app:latest .
-      - docker tag my-todo-nextjs-app:latest 919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
+      - echo Build completed on $DATETIME
       - echo Build completed on `date`
       - echo Pushing the Docker images...
-      - docker push 919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
       - printf '[{"name":"%s","imageUri":"%s"}]' "RRC-Dev-container" "919620897356.dkr.ecr.ap-south-1.amazonaws.com/my-todo-nextjs-app:latest" > ./../imagedefinitions.json
+      - cp ./../imagedefinitions.json .
+      - echo Printing ./../imagedefinitions.json
       - cat ./../imagedefinitions.json
+      - echo Printing imagedefinitions.json
+      - cat imagedefinitions.json
 
 artifacts:
     files: imagedefinitions.json
+    secondary-artifacts: {
+      imagedefinitions: {
+        files: imagedefinitions.json,
+        name: imagedefinitions
+      }
+    }
+
