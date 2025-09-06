@@ -19,11 +19,6 @@ import { FargateStack } from './fargate-v2-stack';
 import { AuthStack } from './auth-stack';
 
 
-/* 
-GitHub Token : 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
-Source Youtube Video : https://www.youtube.com/watch?v=Z3YNjMxuN9U&t=683s
-*/
-
 
 export interface PipelineV2StageProps extends cdk.StageProps {
     stageName: string
