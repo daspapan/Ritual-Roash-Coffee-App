@@ -21,8 +21,6 @@ Source Youtube Video : https://www.youtube.com/watch?v=Z3YNjMxuN9U&t=683s
 */
 
 
-/* 
-
 export interface PipelineV2StageProps extends cdk.StageProps {
     stageName: string
 }
@@ -35,9 +33,9 @@ export class PipelineV2Stage extends cdk.Stage {
 
         new AuthStack(
             this, 
-            `${appName}-AuthStack`, 
+            `${appName}-AuthV2Stack`, 
             {
-                stackName: `${appName}-AuthStack`, 
+                stackName: `${appName}-AuthV2Stack`, 
                 env: context.env
             }, 
             context
@@ -45,12 +43,10 @@ export class PipelineV2Stage extends cdk.Stage {
     }
 }
 
-*/
-
 
 export interface PipelineV2StackProps extends cdk.StackProps {
-    fargateService: ecs.FargateService;
-    ecrRepository: ecr.Repository;
+    fargateService?: ecs.FargateService;
+    ecrRepository?: ecr.Repository;
 }
 
 export class PipelineV2Stack extends cdk.Stack {
@@ -70,13 +66,13 @@ export class PipelineV2Stack extends cdk.Stack {
         const branch = `${context.hosting.ghBranch}` || 'main'
 
         
-        const { fargateService, ecrRepository } = props;
+        // const { fargateService, ecrRepository } = props;
 
 
         // ─────────────────────────────────────────────────────────────
         // CONFIG (change these for your repo/app)
         // ─────────────────────────────────────────────────────────────
-        const github = {
+        /* const github = {
             owner,
             repo,
             branch,
@@ -84,6 +80,8 @@ export class PipelineV2Stack extends cdk.Stack {
             // with repo:read permissions (fine-grained PAT recommended).
             oauthSecretName: 'github-token-1',
         };
+
+        
 
 
         // ─────────────────────────────────────────────────────────────
@@ -187,21 +185,56 @@ export class PipelineV2Stack extends cdk.Stack {
             // imageFile: buildOutput.atPath("imagedefinitions.json"),
             deploymentTimeout: cdk.Duration.minutes(60),
             role: deployRole,
-        });
+        }); 
+        
+        */
 
-        new codepipeline.Pipeline(this, `${appName}-Pipeline`, {
+
+        const git_input = pipeline.CodePipelineSource.connection(
+            `${owner}/${repo}`, `${branch}`, {
+                connectionArn: `arn:aws:codeconnections:ap-south-1:919620897356:connection/d499b4b1-326e-4edf-8adb-8214c4f15d0f`
+            }
+        )
+
+        const code_pipeline = new codepipeline.Pipeline(this, `${appName}-Pipeline`, {
+            pipelineName: `${appName}-Pipeline`,
             pipelineType: codepipeline.PipelineType.V2,
-            stages: [
+            /* stages: [
                 { stageName: 'Source', actions: [sourceAction] },
                 { stageName: 'Build', actions: [buildAction] },
                 { stageName: 'Deploy', actions: [deployAction] },
-            ], 
+            ],  */
+            crossAccountKeys: false,
         });
+
+        const synth_step = new pipeline.ShellStep(`${appName}-Synth`, {
+            input: git_input,
+            installCommands: [],
+            commands: [
+                'cd infra',
+                'npm ci',
+                'npm run synth'
+            ],
+            primaryOutputDirectory: 'next-app/.next',
+        })
+
+        const fargatePipeline = new pipeline.CodePipeline(this, `${appName}-Code-Pipeline`, {
+            // pipelineName: `${appName}-Code-Pipeline-Name`,
+            selfMutation: true,
+            codePipeline: code_pipeline,
+            synth: synth_step,
+        })
+
+
+        const deployment_wave = fargatePipeline.addWave("DeploymentWave")
+
+        deployment_wave.addStage(new PipelineV2Stage(this, `${appName}-DeployStage`, {stageName: appStage,}, {...context}))
+
 
         // ─────────────────────────────────────────────────────────────
         // OUTPUTS
         // ─────────────────────────────────────────────────────────────
-        new cdk.CfnOutput(this, 'GithubRepo', { value: `${github.owner}/${github.repo} (${github.branch})` });
+        // new cdk.CfnOutput(this, 'GithubRepo', { value: `${github.owner}/${github.repo} (${github.branch})` });
 
 
 
