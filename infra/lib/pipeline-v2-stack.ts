@@ -211,9 +211,9 @@ export class PipelineV2Stack extends cdk.Stack {
             input: git_input,
             installCommands: [],
             commands: [
-                'cd infra',
+                'cd next-app',
                 'npm ci',
-                'npm run synth'
+                'npm run build'
             ],
             primaryOutputDirectory: 'next-app/.next',
         })
@@ -222,7 +222,7 @@ export class PipelineV2Stack extends cdk.Stack {
             // pipelineName: `${appName}-Code-Pipeline-Name`,
             selfMutation: true,
             codePipeline: code_pipeline,
-            synth: synth_step,
+            synth: synth_step
         })
 
 
