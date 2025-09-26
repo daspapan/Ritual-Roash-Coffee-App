@@ -31,7 +31,6 @@ export class PgCrudStack extends cdk.Stack {
         const { vpc, rdsSecret, privateSecurityGroup, nodeJsLayer, dbInitializerLambdaRole } = props;
 
 
-
         // IAM Role for Image Handler Lambda
         /* const pgCrudOpsHandlerLambdaRole = new iam.Role(this, `${appName}-PgCrudOpsHandlerLambdaRole`, {
             assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),

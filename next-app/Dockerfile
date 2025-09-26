@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:22 AS builder
+ARG TARGETPLATFORM=linux/amd64
+FROM --platform=$TARGETPLATFORM public.ecr.aws/docker/library/node:22 AS builder
 
 WORKDIR /usr/src/app
 
@@ -11,7 +12,7 @@ COPY . .
 
 RUN npm run build
 
-FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:22
+FROM --platform=$TARGETPLATFORM public.ecr.aws/docker/library/node:22
 
 WORKDIR /usr/src/app
 
